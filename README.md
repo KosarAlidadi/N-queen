@@ -1,6 +1,7 @@
 # N-Queens Solver - Solving the N-Queens Problem with Python
 
-This project is a graphical application that solves the well-known N-Queens problem (placing N queens on an N×N chessboard such that none threaten each other) using various algorithms. It features a user-friendly GUI built with Tkinter and visualizes the solutions using a queen image.
+This project is a graphical application that solves the well-known N-Queens problem (placing N queens on an N×N chessboard such that none threaten each other) using various algorithms.
+It features a user-friendly GUI built with Tkinter and visualizes the solutions using a queen image.
 
 ---
 
