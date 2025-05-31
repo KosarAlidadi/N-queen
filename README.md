@@ -1,47 +1,54 @@
-# N-Queens Solver - Solving the N-Queens Problem with Python
+# N-Queens Solver with GUI (Backtracking, Genetic, CSP)
 
-This project is a graphical application that solves the well-known N-Queens problem (placing N queens on an N×N chessboard such that none threaten each other) using various algorithms.
-It features a user-friendly GUI built with Tkinter and visualizes the solutions using a queen image.
+This project is a Python-based application that solves the N-Queens problem using three different algorithms:
+- Backtracking (exact search)
+- Genetic Algorithm (approximate solution)
+- CSP (Constraint Satisfaction Problem) approach
 
----
-
-## Features
-
-- Exact solution using the **Backtracking Algorithm**
-- Approximate solution using the **Genetic Algorithm**
-- Step-by-step display of all solutions in Backtracking mode
-- Simple and user-friendly graphical interface
-- Visual representation of queens using an image
-- Clean, modular, and extendable codebase
+It features a Tkinter-based GUI, supports manual initial queen placement, and visualizes the step-by-step movements of each algorithm.
 
 ---
 
-## File Structure
+##  Features
+
+- ✅ Backtracking: Explores all valid solutions recursively
+- ✅ Genetic Algorithm: Heuristic search with crossover/mutation
+- ✅ CSP : Forward-checking with constraints
+- ✅ Manual input of initial board state
+- ✅ Step-by-step move sequence display for each algorithm
+- ✅ Scalable chessboard (queens resize with cell size)
+- ✅ Modular codebase with clean architecture
+- ✅ User-friendly graphical interface (Tkinter)
+
+---
+
+##  Project Structure
 
 ```
-n_queens_project/
-│
-├── gui.py               # Main GUI application (Tkinter interface)
-├── backtracking.py      # Backtracking algorithm implementation (returns all solutions)
-├── Genetic.py           # Genetic algorithm implementation (returns one approximate solution)
-├── queen.png            # Queen image used to render on the chessboard
-└── README.md            # Project documentation
+N_queen/
+├── gui.py               # Main GUI interface
+├── backtracking.py      # Backtracking algorithm implementation
+├── Genetic.py           # Genetic algorithm implementation
+├── csp.py               # CSP-based solver
+├── queen.png            # Queen image for rendering
+ README.md            # Project documentation
 ```
 
 ---
 
-##  Installation & Running the Project
-
-### Prerequisites:
+##  Requirements
 
 - Python 3.10 or higher
-- Required packages:
+- Pillow library for image rendering
 
+Install required packages:
 ```bash
 pip install pillow
 ```
 
-### Running the Application:
+---
+
+##  How to Run
 
 ```bash
 python gui.py
@@ -49,42 +56,43 @@ python gui.py
 
 ---
 
-## How to Use
+##  How to Use
 
-1. Run the application.
-2. Enter the number of queens (e.g., 8) in the input field.
-3. Use the buttons:
-   - **Backtracking**: Solves the problem using the backtracking algorithm and displays the first solution.
-   - **Next Solution**: Shows the next available solution (in Backtracking mode).
-   - **Genetic Algorithm**: Uses a genetic approach to find a solution.
-
-> Note: If the queen image (`queen.png`) is missing in the project directory, the program will not run.
-
----
-
-## Queen Image Instructions
-
-The `queen.png` image must be located in the same directory as the project files. The image is dynamically resized based on the board cell size.
-
-**Recommendation**: Use a PNG image with a transparent background for better visual integration with the chessboard.
+1. Run the app.
+2. Enter board size (e.g. 8 for 8×8).
+3. (Optional) Use "Manual Input" to place queens before solving.
+4. Choose your algorithm:
+   - Backtracking
+   - Genetic
+   - CSP
+5. The board will show step-by-step movement to the final solution.
 
 ---
 
-##  Future Plans (Roadmap)
+##  Notes
 
-- [ ] Implement a csp Algorithm
-- [ ] Display movement sequences for algorithms
-- [ ] Support custom initial states
-- [ ] Allow manual algorithm selection and animation speed control
-
----
-
-## Developer
-
-Kosar Alidadi
+- Ensure queen.png is in the same directory as gui.py.
+- Manual input requires clicking on the board to place queens before running the algorithm.
+- For Genetic and CSP, manual state must be valid (no conflicts).
 
 ---
 
-## License
+##  Future Features
 
-This project is free for educational use. Feel free to use and modify it with proper attribution.lgorithms 3.  CSP 
+- [ ] Adjustable animation speed
+- [ ] Save/load board states
+- [ ] Export solution to file
+- [ ] Enhanced CSP heuristics (e.g., MRV, degree heuristic)
+
+---
+
+##  Author
+
+Kosar Alidadi  
+For educational purposes – feel free to use and modify with attribution.
+
+---
+
+##  License
+
+This project is free for academic and personal use. 
