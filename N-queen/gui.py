@@ -1,122 +1,158 @@
 import tkinter as tk
 from tkinter import messagebox
-from backtracking import solve_n_queens  # باید تمام جواب‌ها رو برگردونه
-from Genetic import genetic_algorithm
-from PIL import Image, ImageTk  # برای نمایش عکس وزیر
+from PIL import Image, ImageTk
+
+from backtracking import solve_backtracking
+from Genetic import solve_genetic
+from csp import solve_csp
 
 # متغیرهای عمومی
+queen_img = None
 solutions = []
 current_solution_index = 0
-queen_base_img = None  # تصویر اصلی وزیر (PIL.Image)
+sequence_label = None
 
-# تابع برای رسم صفحه شطرنج و وزرا
-def draw_board(board, canvas, n):
-    global queen_base_img
-    cell_size = 600 // n
-    canvas.delete("all")
 
-    # رسم صفحه شطرنج
-    for row in range(n):
-        for col in range(n):
-            x1 = col * cell_size
-            y1 = row * cell_size
-            x2 = x1 + cell_size
-            y2 = y1 + cell_size
-            color = "white" if (row + col) % 2 == 0 else "gray"
-            canvas.create_rectangle(x1, y1, x2, y2, fill=color)
-
-    # مقیاس‌کردن عکس وزیر
-    queen_size = int(cell_size * 0.8)
-    resized = queen_base_img.resize((queen_size, queen_size), Image.Resampling.LANCZOS)
-    queen_image = ImageTk.PhotoImage(resized)
-    canvas.image = queen_image  # نگه‌داشتن رفرنس تصویر
-
-    # رسم وزرا
-    for row in range(n):
-        col = board[row]
-        x = col * cell_size + cell_size // 2
-        y = row * cell_size + cell_size // 2
-        canvas.create_image(x, y, anchor="center", image=queen_image)
-
-# حل با الگوریتم بازگشتی
-def solve_backtracking():
-    global solutions, current_solution_index
+def load_queen_image(cell_size):
+    """بارگذاری تصویر وزیر با اندازه مناسب"""
+    global queen_img
     try:
-        n = int(entry_n.get())
-    except ValueError:
-        messagebox.showerror("Error", "Enter a valid number for N.")
+        img = Image.open("queen.png").resize((cell_size, cell_size))
+        queen_img = ImageTk.PhotoImage(img)
+    except Exception as e:
+        messagebox.showerror("Image Error", f"Cannot load queen.png: {e}")
+
+
+def draw_board(canvas, board, n):
+    """رسم صفحه شطرنج و جای‌گذاری وزیرها"""
+    canvas.delete("all")
+    cell_size = min(480 // n, 60)
+    load_queen_image(cell_size)
+
+    for i in range(n):
+        for j in range(n):
+            color = "white" if (i + j) % 2 == 0 else "gray"
+            x1, y1 = j * cell_size, i * cell_size
+            x2, y2 = x1 + cell_size, y1 + cell_size
+            canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+            if board[i] == j:
+                canvas.create_image(x1, y1, anchor="nw", image=queen_img)
+
+
+def parse_initial_input(text, n):
+    """تجزیه حالت اولیه وارد شده توسط کاربر"""
+    try:
+        parts = text.strip().split(',')
+        if len(parts) != n:
+            raise ValueError
+        return [int(p.strip()) for p in parts]
+    except:
+        messagebox.showerror("Input Error", f"Initial state must contain exactly {n} values (e.g., -1,-1,-1,...)")
+        return None
+
+
+def update_sequence_display(state):
+    """نمایش مسیر حل (sequence)"""
+    seq = ",".join(str(x) for x in state)
+    sequence_label.config(text=f"Sequence: [{seq}]")
+
+
+def on_backtracking(n, initial, canvas):
+    """اجرای الگوریتم بازگشتی"""
+    global solutions, current_solution_index
+    solutions = solve_backtracking(n, initial)
+    if not solutions:
+        messagebox.showinfo("No Solution", "No solution found.")
         return
+    current_solution_index = 0
+    draw_board(canvas, solutions[0], n)
+    update_sequence_display(solutions[0])
 
-    all_solutions = solve_n_queens(n)
-    if all_solutions:
-        solutions = all_solutions
-        current_solution_index = 0
-        draw_board(solutions[0], canvas, n)
-        label_info.config(text=f"Found {len(solutions)} solutions.")
-        button_next_solution.config(state="normal")
-    else:
-        label_info.config(text="No solution found.")
-        button_next_solution.config(state="disabled")
 
-# راه‌حل بعدی
-def show_next_solution():
-    global current_solution_index
+def on_next_solution(n, canvas):
+    """مشاهده راه‌حل بعدی در الگوریتم بازگشتی"""
+    global solutions, current_solution_index
     if not solutions:
         return
     current_solution_index = (current_solution_index + 1) % len(solutions)
-    n = int(entry_n.get())
-    draw_board(solutions[current_solution_index], canvas, n)
+    draw_board(canvas, solutions[current_solution_index], n)
+    update_sequence_display(solutions[current_solution_index])
 
-# حل با الگوریتم ژنتیک
-def solve_genetic():
-    try:
-        n = int(entry_n.get())
-    except ValueError:
-        messagebox.showerror("Error", "Enter a valid number for N.")
-        return
 
-    solution, generation = genetic_algorithm(n)
-    if solution and isinstance(solution, list):
-        draw_board(solution, canvas, n)
-        label_info.config(text=f"Solution found in {generation} generations.")
-        button_next_solution.config(state="disabled")
+def on_genetic(n, initial, canvas):
+    """اجرای الگوریتم ژنتیکی"""
+    solution = solve_genetic(n, initial)
+    if solution:
+        draw_board(canvas, solution, n)
+        update_sequence_display(solution)
     else:
-        label_info.config(text="No solution found.")
-        button_next_solution.config(state="disabled")
+        messagebox.showinfo("No Solution", "Genetic algorithm failed to find a solution.")
 
-# رابط گرافیکی
-root = tk.Tk()
-root.title("N-Queens Solver")
 
-# بارگذاری تصویر وزیر پس از ساخت root
-try:
-    queen_base_img = Image.open("queen.png")
-except Exception as e:
-    messagebox.showerror("Error", f"Cannot load image: {e}")
-    root.quit()
+def on_csp(n, initial, canvas):
+    """اجرای الگوریتم CSP"""
+    solution = solve_csp(n, initial)
+    if solution:
+        draw_board(canvas, solution, n)
+        update_sequence_display(solution)
+    else:
+        messagebox.showinfo("No Solution", "CSP algorithm failed to find a solution.")
 
-frame_controls = tk.Frame(root)
-frame_controls.pack()
 
-label_n = tk.Label(frame_controls, text="Number of Queens (N):")
-label_n.pack(side=tk.LEFT)
+def create_gui():
+    """ساخت رابط گرافیکی برنامه"""
+    root = tk.Tk()
+    root.title("N-Queens Solver")
 
-entry_n = tk.Entry(frame_controls, width=5)
-entry_n.pack(side=tk.LEFT)
+    tk.Label(root, text="Number of Queens (N):").grid(row=0, column=0, sticky="e")
+    n_entry = tk.Entry(root)
+    n_entry.insert(0, "8")
+    n_entry.grid(row=0, column=1, pady=5)
 
-button_backtracking = tk.Button(frame_controls, text="Backtracking", command=solve_backtracking)
-button_backtracking.pack(side=tk.LEFT, padx=5)
+    tk.Label(root, text="Initial State (-1 for empty, e.g. -1,-1,2,...):").grid(row=1, column=0, columnspan=2)
+    init_entry = tk.Entry(root, width=40)
+    init_entry.insert(0, "-1,-1,-1,-1,-1,-1,-1,-1")
+    init_entry.grid(row=2, column=0, columnspan=2, pady=5)
 
-button_next_solution = tk.Button(frame_controls, text="Next Solution", command=show_next_solution, state="disabled")
-button_next_solution.pack(side=tk.LEFT)
+    canvas = tk.Canvas(root, width=480, height=480)
+    canvas.grid(row=3, column=0, columnspan=2, pady=10)
 
-button_genetic = tk.Button(frame_controls, text="Genetic Algorithm", command=solve_genetic)
-button_genetic.pack(side=tk.LEFT, padx=5)
+    def get_values():
+        try:
+            n = int(n_entry.get())
+            initial = parse_initial_input(init_entry.get(), n)
+            return n, initial
+        except:
+            messagebox.showerror("Error", "Invalid input.")
+            return None, None
 
-label_info = tk.Label(root, text="")
-label_info.pack()
+    # دکمه‌ها برای اجرای الگوریتم‌ها
+    tk.Button(root, text="Backtracking", command=lambda: run_backtracking(canvas)).grid(row=4, column=0, sticky="ew", padx=5)
+    tk.Button(root, text="Next Solution", command=lambda: on_next_solution(int(n_entry.get()), canvas)).grid(row=4, column=1, sticky="ew", padx=5)
+    tk.Button(root, text="Genetic", command=lambda: run_genetic(canvas)).grid(row=5, column=0, sticky="ew", padx=5)
+    tk.Button(root, text="CSP", command=lambda: run_csp(canvas)).grid(row=5, column=1, sticky="ew", padx=5)
 
-canvas = tk.Canvas(root, width=600, height=600)
-canvas.pack()
+    global sequence_label
+    sequence_label = tk.Label(root, text="Sequence: []", fg="blue")
+    sequence_label.grid(row=6, column=0, columnspan=2, pady=10)
 
-root.mainloop()
+    def run_backtracking(canvas):
+        n, initial = get_values()
+        if initial is not None:
+            on_backtracking(n, initial, canvas)
+
+    def run_genetic(canvas):
+        n, initial = get_values()
+        if initial is not None:
+            on_genetic(n, initial, canvas)
+
+    def run_csp(canvas):
+        n, initial = get_values()
+        if initial is not None:
+            on_csp(n, initial, canvas)
+
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    create_gui()

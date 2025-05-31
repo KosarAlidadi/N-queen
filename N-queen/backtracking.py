@@ -1,34 +1,30 @@
-def solve_n_queens(n):
-    board = [-1] * n
+# backtracking.py
+# حل دقیق با استفاده از الگوریتم بازگشتی (Backtracking)
+
+def is_safe(state, row, col):
+    for r in range(row):
+        c = state[r]
+        if c == col or abs(c - col) == abs(r - row):
+            return False
+    return True
+
+def backtrack(n, row, state, initial, solutions):
+    if row == n:
+        solutions.append(state.copy())
+        return
+    if initial[row] != -1:
+        # اگر مقدار اولیه برای این سطر داده شده باشد
+        if is_safe(state, row, initial[row]):
+            state[row] = initial[row]
+            backtrack(n, row + 1, state, initial, solutions)
+        return
+    for col in range(n):
+        if is_safe(state, row, col):
+            state[row] = col
+            backtrack(n, row + 1, state, initial, solutions)
+
+def solve_backtracking(n, initial):
+    state = [-1] * n
     solutions = []
-    
-    # سه مجموعه برای ردیف‌های پرشده، ستون‌های پرشده و قطرهای پرشده
-    cols = set()  # ستون‌ها
-    diag1 = set()  # قطرهای اصلی
-    diag2 = set()  # قطرهای فرعی
-
-    def backtrack(row=0):
-        if row == n:
-            solutions.append(board[:])
-            return
-        
-        for col in range(n):
-            # اگر ستون یا قطرها تداخل دارند، ادامه نده
-            if col in cols or (row - col) in diag1 or (row + col) in diag2:
-                continue
-            
-            # افزودن ستون و قطرها به مجموعه‌ها
-            cols.add(col)
-            diag1.add(row - col)
-            diag2.add(row + col)
-            
-            board[row] = col
-            backtrack(row + 1)
-            
-            # حذف ستون و قطرها از مجموعه‌ها (برگشت به حالت قبلی)
-            cols.remove(col)
-            diag1.remove(row - col)
-            diag2.remove(row + col)
-
-    backtrack()
+    backtrack(n, 0, state, initial, solutions)
     return solutions
